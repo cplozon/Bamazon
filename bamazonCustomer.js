@@ -203,30 +203,25 @@ function checkout(){
 // function updateDatabase
 
 function updateDatabase(fTotal){
-    console.log("Inupdatedb");
    var item = shoppingCart.shift();  //use shift to get first item in the array similar to numberofitems function
-   console.log(item);
    var itemName = item.item;
-   console.log("Item name " + itemName);
    var itemCost = item.itemCost
-   console.log("Item Price " + itemCost);
    var userPurchase = item.amount;
-   console.log(" userpruchase" + userPurchase);
    var department = item.department;
-   console.log("department " + department);
    var departmentTransaction = itemCost * userPurchase;
+   connection.query('SELECT total_sales FROM Department WHERE ? ' , {
+    department_name: department
 
-   connection.query('SELECT total_sales FROM Department WHERE ?', {
-    DepartmentName: department
    }, function(err, res){
-      var departmentTotalSale = res[0].total_sales;
+    //console.log("res" + JSON.stringify(res));
+      var departmentTotalSale = res[0]["total_sales"];
 
       connection.query('UPDATE Department SET ? WHERE ?', [
     {
       total_sales: departmentTotalSale += departmentTransaction
     },
     {
-      DepartmentName: department
+      department_name: department
     }], function(err){
       if(err) throw err;
     });
@@ -234,7 +229,7 @@ function updateDatabase(fTotal){
 
 //query mysql to get the current StockQuantity of the item in case it has changed since the user has added the item to shoppingCart
     connection.query('SELECT stock_quantity FROM Products WHERE ?', {
-    ProductName: itemName
+    product_name: itemName
 
     }, function(err, res){
      var currentStock = res[0].stock_quantity;
@@ -245,7 +240,7 @@ function updateDatabase(fTotal){
       stock_quantity: currentStock -= userPurchase
      },
      {
-       ProductName: itemName
+       product_name: itemName
      }], function(err){
        if(err) throw err;
        //if there are still items in the shoppingCart run the function again
